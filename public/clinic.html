@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clinic Appointment Directory - Complete Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-app: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent-primary: #0284c7;
+            --accent-secondary: #0d9488;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-app: #0b1120;
+                --bg-surface: #111827;
+                --text-primary: #f8fafc;
+                --text-secondary: #94a3b8;
+                --accent-primary: #38bdf8;
+                --accent-secondary: #2dd4bf;
+            }
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+        }
+
+        .glass-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .smooth-transition {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
+
+    <!-- Error Boundary Fallback Container -->
+    <div id="app-error-banner" class="hidden bg-red-600 text-white px-4 py-3 text-sm font-medium text-center">
+        Something went wrong while rendering the directory. Please refresh the page.
+    </div>
+
+    <!-- Top Navigation Bar (Reusable Layout Header) -->
+    <header class="sticky top-0 z-40 glass-nav bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <button id="brand-home-btn" class="flex items-center gap-2.5 text-left group focus:outline-none">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-sky-600/20 group-hover:scale-105 smooth-transition">
+                    <i class="fas fa-heart-pulse text-lg"></i>
+                </div>
+                <div>
+                    <span class="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white block leading-none">
+                        Clinic<span class="text-sky-600 dark:text-sky-400">Care</span>
+                    </span>
+                    <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Appointment Directory</span>
+                </div>
+            </button>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/70 dark:border-slate-700/70">
+                <button data-nav="home" class="nav-link px-4 py-1.5 rounded-lg text-sm font-semibold smooth-transition">Home</button>
+                <button data-nav="clinics" class="nav-link px-4 py-1.5 rounded-lg text-sm font-semibold smooth-transition">Clinics</button>
+                <button data-nav="doctors" class="nav-link px-4 py-1.5 rounded-lg text-sm font-semibold smooth-transition">Doctors</button>
+                <button data-nav="appointments" class="nav-link px-4 py-1.5 rounded-lg text-sm font-semibold smooth-transition flex items-center gap-1.5">
+                    <span>My Appointments</span>
+                    <span id="appt-count-badge" class="bg-sky-600 text-white text-[11px] font-bold px-1.5 py-0.2 rounded-full">0</span>
+                </button>
+            </nav>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-2">
+                <button data-nav="doctors" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/20 smooth-transition flex items-center gap-1.5">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Book Now</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Bar -->
+        <div class="flex md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 py-1.5 justify-around text-xs font-semibold">
+            <button data-nav="home" class="mobile-nav-link flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button data-nav="clinics" class="mobile-nav-link flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg">
+                <i class="fas fa-hospital"></i>
+                <span>Clinics</span>
+            </button>
+            <button data-nav="doctors" class="mobile-nav-link flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg">
+                <i class="fas fa-user-doctor"></i>
+                <span>Doctors</span>
+            </button>
+            <button data-nav="appointments" class="mobile-nav-link flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg relative">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Bookings</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Dynamic View Container -->
+    <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8"></main>
+
+    <!-- Reusable Footer Component -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-hospital-user text-sky-600 dark:text-sky-400"></i>
+                <span class="font-semibold text-slate-700 dark:text-slate-200">ClinicCare Directory</span>
+                <span>• Amman, Zarqa & Irbid</span>
+            </div>
+            <p class="text-xs text-center sm:text-right">
+                Web Applications Development II — Group 5 Showcase (Clinics, Specialties, Doctors & Schedules)
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        /**
+         * Application State & Sample Dataset
+         * Contains clinics across Amman, Zarqa, and Irbid, specialties, doctors, schedules, and booked appointments.
+         */
+        const AppState = {
+            currentView: 'home', // 'home' | 'clinics' | 'doctors' | 'doctor-detail' | 'appointments'
+            selectedDoctorId: null,
+            selectedSpecialty: 'All',
+            selectedCity: 'All',
+            searchQuery: '',
+            toastMessage: null,
+            appointments: [
+                {
+                    id: 'APT-1042',
+                    doctorId: 1,
+                    doctorName: 'Dr. Ahmad Al-Kilani',
+                    specialty: 'Dentistry',
+                    clinicName: 'Royal Dental Care',
+                    city: 'Amman',
+                    patientName: 'Dima Salameh',
+                    phone: '0795551234',
+                    date: '2026-11-24',
+                    timeSlot: '10:30 AM',
+                    notes: 'Routine dental checkup and cleaning.',
+                    status: 'Confirmed'
+                }
+            ]
+        };
+
+        const SpecialtiesData = [
+            { name: 'Dentistry', icon: 'fa-tooth', color: 'text-sky-600 bg-sky-100 dark:bg-sky-900/40 dark:text-sky-300' },
+            { name: 'Pediatrics', icon: 'fa-baby', color: 'text-teal-600 bg-teal-100 dark:bg-teal-900/40 dark:text-teal-300' },
+            { name: 'Ophthalmology', icon: 'fa-eye', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-300' },
+            { name: 'Cardiology', icon: 'fa-heart-circle-check', color: 'text-rose-600 bg-rose-100 dark:bg-rose-900/40 dark:text-rose-300' },
+            { name: 'Dermatology', icon: 'fa-spa', color: 'text-amber-600 bg-amber-100 dark:bg-amber-900/40 dark:text-amber-300' },
+            { name: 'Orthopedics', icon: 'fa-bone', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/40 dark:text-purple-300' }
+        ];
+
+        const ClinicsData = [
+            {
+                id: 1,
+                name: 'Royal Dental Care',
+                city: 'Amman',
+                address: 'Shmeisani, Al-Shareef Abdul Hamid Sharaf St.',
+                phone: '06-560-1122',
+                hours: 'Sun – Thu: 09:00 AM – 06:00 PM',
+                rating: '4.9',
+                image: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80',
+                description: 'Modern dental & aesthetic clinic offering implants, orthodontics, and painless preventive care.'
+            },
+            {
+                id: 2,
+                name: 'Al-Yasmin Pediatric Center',
+                city: 'Irbid',
+                address: 'University Street, Near Al-Huson Junction',
+                phone: '02-724-6543',
+                hours: 'Sat – Wed: 09:30 AM – 04:30 PM',
+                rating: '4.8',
+                image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80',
+                description: 'Child-friendly medical center dedicated to infant care, vaccinations, and pediatric growth monitoring.'
+            },
+            {
+                id: 3,
+                name: 'Noor Al-Hayat Medical Center',
+                city: 'Zarqa',
+                address: 'Al-Saadah Street, Downtown',
+                phone: '05-365-4321',
+                hours: 'Sun – Thu: 08:30 AM – 05:00 PM',
+                rating: '4.7',
+                image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80',
+                description: 'Comprehensive outpatient clinic specializing in internal medicine, cardiology, and chronic care.'
+            },
+            {
+                id: 4,
+                name: 'Vision Eye & Laser Center',
+                city: 'Amman',
+                address: '5th Circle, Zahran Street',
+                phone: '06-592-9012',
+                hours: 'Sun, Tue, Thu: 12:00 PM – 08:00 PM',
+                rating: '4.9',
+                image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80',
+                description: 'Advanced ophthalmology center equipped with diagnostic imaging and vision correction suites.'
+            },
+            {
+                id: 5,
+                name: 'DermaGlow Skin Clinic',
+                city: 'Amman',
+                address: 'Abdoun, Sulaiman Al-Nabulsi St.',
+                phone: '06-593-1753',
+                hours: 'Sat, Mon, Wed: 11:00 AM – 06:30 PM',
+                rating: '4.8',
+                image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=800&q=80',
+                description: 'Specialized clinical dermatology and medical laser treatments with personalized care plans.'
+            },
+            {
+                id: 6,
+                name: 'Al-Qimma Bone & Joint Clinic',
+                city: 'Irbid',
+                address: 'Al-Qubbah Circle, Wasfi Al-Tal St.',
+                phone: '02-727-1852',
+                hours: 'Sun, Tue, Thu: 10:00 AM – 05:00 PM',
+                rating: '4.7',
+                image: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80',
+                description: 'Orthopedic care for joint pain, sports injuries, spine consultations, and rehabilitation guidance.'
+            }
+        ];
+
+        const DoctorsData = [
+            {
+                id: 1,
+                name: 'Dr. Ahmad Al-Kilani',
+                specialty: 'Dentistry',
+                clinicId: 1,
+                clinicName: 'Royal Dental Care',
+                city: 'Amman',
+                experience: '9 Years Experience',
+                fee: '25 JOD',
+                available: true,
+                avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=400&q=80',
+                bio: 'Specialist in dental implants, oral surgery, and aesthetic smile design with over 9 years of clinical practice.',
+                schedule: [
+                    { day: 'Sunday', hours: '09:00 AM – 03:00 PM', slots: ['09:30 AM', '10:30 AM', '12:00 PM', '02:00 PM'] },
+                    { day: 'Monday', hours: '09:00 AM – 03:00 PM', slots: ['09:00 AM', '11:00 AM', '01:00 PM'] },
+                    { day: 'Tuesday', hours: '09:00 AM – 03:00 PM', slots: ['10:00 AM', '11:30 AM', '02:30 PM'] },
+                    { day: 'Wednesday', hours: '09:00 AM – 03:00 PM', slots: ['09:30 AM', '01:30 PM'] },
+                    { day: 'Thursday', hours: '09:00 AM – 02:00 PM', slots: ['10:00 AM', '12:30 PM'] }
+                ]
+            },
+            {
+                id: 2,
+                name: 'Dr. Reem Al-Abdullah',
+                specialty: 'Pediatrics',
+                clinicId: 2,
+                clinicName: 'Al-Yasmin Pediatric Center',
+                city: 'Irbid',
+                experience: '12 Years Experience',
+                fee: '20 JOD',
+                available: true,
+                avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80',
+                bio: 'Senior pediatric consultant focusing on newborn care, childhood immunizations, nutrition, and seasonal illnesses.',
+                schedule: [
+                    { day: 'Saturday', hours: '10:00 AM – 04:00 PM', slots: ['10:00 AM', '11:30 AM', '02:00 PM'] },
+                    { day: 'Sunday', hours: '10:00 AM – 04:00 PM', slots: ['10:30 AM', '01:00 PM', '03:00 PM'] },
+                    { day: 'Monday', hours: '10:00 AM – 04:00 PM', slots: ['11:00 AM', '02:30 PM'] },
+                    { day: 'Tuesday', hours: '10:00 AM – 04:00 PM', slots: ['10:00 AM', '01:30 PM'] },
+                    { day: 'Wednesday', hours: '10:00 AM – 03:30 PM', slots: ['11:00 AM', '02:00 PM'] }
+                ]
+            },
+            {
+                id: 3,
+                name: 'Dr. Sarah Al-Khatib',
+                specialty: 'Cardiology',
+                clinicId: 3,
+                clinicName: 'Noor Al-Hayat Medical Center',
+                city: 'Zarqa',
+                experience: '8 Years Experience',
+                fee: '25 JOD',
+                available: true,
+                avatar: 'https://images.unsplash.com/photo-1594824476967-48c8b964ac31?auto=format&fit=crop&w=400&q=80',
+                bio: 'Internal medicine and cardiology specialist managing hypertension, heart checkups, diabetes, and preventive screenings.',
+                schedule: [
+                    { day: 'Sunday', hours: '08:30 AM – 02:30 PM', slots: ['09:00 AM', '10:30 AM', '12:30 PM'] },
+                    { day: 'Monday', hours: '08:30 AM – 02:30 PM', slots: ['09:30 AM', '11:30 AM', '01:30 PM'] },
+                    { day: 'Wednesday', hours: '08:30 AM – 02:30 PM', slots: ['09:00 AM', '11:00 AM'] },
+                    { day: 'Thursday', hours: '08:30 AM – 02:00 PM', slots: ['10:00 AM', '12:00 PM'] }
+                ]
+            },
+            {
+                id: 4,
+                name: 'Dr. Tariq Al-Masri',
+                specialty: 'Ophthalmology',
+                clinicId: 4,
+                clinicName: 'Vision Eye & Laser Center',
+                city: 'Amman',
+                experience: '15 Years Experience',
+                fee: '30 JOD',
+                available: false,
+                avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=400&q=80',
+                bio: 'Consultant eye surgeon experienced in refractive laser procedures, cataract evaluation, and retinal care.',
+                schedule: [
+                    { day: 'Sunday', hours: '01:00 PM – 07:30 PM', slots: ['01:30 PM', '03:30 PM', '05:30 PM'] },
+                    { day: 'Tuesday', hours: '01:00 PM – 07:30 PM', slots: ['02:00 PM', '04:00 PM', '06:00 PM'] },
+                    { day: 'Thursday', hours: '01:00 PM – 06:30 PM', slots: ['01:30 PM', '03:00 PM'] }
+                ]
+            },
+            {
+                id: 5,
+                name: 'Dr. Layla Al-Mansour',
+                specialty: 'Dermatology',
+                clinicId: 5,
+                clinicName: 'DermaGlow Skin Clinic',
+                city: 'Amman',
+                experience: '10 Years Experience',
+                fee: '25 JOD',
+                available: true,
+                avatar: 'https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&w=400&q=80',
+                bio: 'Dermatologist specializing in acne therapy, eczema, pigmentation treatments, and clinical skin rejuvenation.',
+                schedule: [
+                    { day: 'Saturday', hours: '11:00 AM – 06:00 PM', slots: ['11:30 AM', '01:30 PM', '04:00 PM'] },
+                    { day: 'Monday', hours: '11:00 AM – 06:00 PM', slots: ['12:00 PM', '02:30 PM', '04:30 PM'] },
+                    { day: 'Wednesday', hours: '11:00 AM – 06:00 PM', slots: ['11:00 AM', '02:00 PM'] }
+                ]
+            },
+            {
+                id: 6,
+                name: 'Dr. Omar Al-Zoubi',
+                specialty: 'Orthopedics',
+                clinicId: 6,
+                clinicName: 'Al-Qimma Bone & Joint Clinic',
+                city: 'Irbid',
+                experience: '14 Years Experience',
+                fee: '25 JOD',
+                available: true,
+                avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80',
+                bio: 'Orthopedic specialist treating joint disorders, knee & shoulder issues, back pain, and sports injuries.',
+                schedule: [
+                    { day: 'Sunday', hours: '10:00 AM – 04:30 PM', slots: ['10:30 AM', '12:30 PM', '02:30 PM'] },
+                    { day: 'Tuesday', hours: '10:00 AM – 04:30 PM', slots: ['11:00 AM', '01:00 PM', '03:00 PM'] },
+                    { day: 'Thursday', hours: '10:00 AM – 03:30 PM', slots: ['10:00 AM', '01:30 PM'] }
+                ]
+            }
+        ];
+
+        /**
+         * Navigation & UI Helpers
+         */
+        function navigateTo(view, doctorId = null) {
+            try {
+                AppState.currentView = view;
+                if (doctorId !== null) {
+                    AppState.selectedDoctorId = doctorId;
+                }
+                updateActiveNavStyles();
+                updateAppointmentBadge();
+                renderCurrentView();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                console.error('Navigation error:', err);
+                showToast('Unable to switch page. Please try again.', 'error');
+            }
+        }
+
+        function updateActiveNavStyles() {
+            const activeView = AppState.currentView === 'doctor-detail' ? 'doctors' : AppState.currentView;
+            document.querySelectorAll('.nav-link').forEach(btn => {
+                const isActive = btn.dataset.nav === activeView;
+                btn.className = isActive
+                    ? 'nav-link px-4 py-1.5 rounded-lg text-sm font-semibold smooth-transition bg-white dark:bg-slate-900 text-sky-600 dark:text-sky-400 shadow-sm flex items-center gap-1.5'
+                    : 'nav-link px-4 py-1.5 rounded-lg text-sm font-semibold smooth-transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5';
+            });
+
+            document.querySelectorAll('.mobile-nav-link').forEach(btn => {
+                const isActive = btn.dataset.nav === activeView;
+                btn.className = isActive
+                    ? 'mobile-nav-link flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-sky-600 dark:text-sky-400'
+                    : 'mobile-nav-link flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-slate-500 dark:text-slate-400';
+            });
+        }
+
+        function updateAppointmentBadge() {
+            const badge = document.getElementById('appt-count-badge');
+            if (badge) {
+                badge.textContent = AppState.appointments.length;
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            AppState.toastMessage = { message, type };
+            renderToast();
+            setTimeout(() => {
+                AppState.toastMessage = null;
+                renderToast();
+            }, 3500);
+        }
+
+        function renderToast() {
+            let toastEl = document.getElementById('toast-notification');
+            if (!AppState.toastMessage) {
+                if (toastEl) toastEl.remove();
+                return;
+            }
+            if (!toastEl) {
+                toastEl = document.createElement('div');
+                toastEl.id = 'toast-notification';
+                toastEl.className = 'fixed bottom-5 right-5 z-50 max-w-sm w-full px-4 py-3 rounded-xl shadow-xl border flex items-center gap-3 text-sm font-semibold smooth-transition';
+                document.body.appendChild(toastEl);
+            }
+            const isSuccess = AppState.toastMessage.type === 'success';
+            toastEl.className = isSuccess
+                ? 'fixed bottom-5 right-5 z-50 max-w-sm w-full px-4 py-3 rounded-xl shadow-xl border bg-emerald-600 border-emerald-500 text-white flex items-center gap-3 text-sm font-semibold'
+                : 'fixed bottom-5 right-5 z-50 max-w-sm w-full px-4 py-3 rounded-xl shadow-xl border bg-rose-600 border-rose-500 text-white flex items-center gap-3 text-sm font-semibold';
+
+            toastEl.innerHTML = `
+                <i class="fas ${isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation'} text-lg"></i>
+                <span>${AppState.toastMessage.message}</span>
+            `;
+        }
+
+        /**
+         * View Renderers
+         */
+        function renderCurrentView() {
+            const container = document.getElementById('main-content');
+            if (!container) return;
+
+            switch (AppState.currentView) {
+                case 'home':
+                    container.innerHTML = renderHomeView();
+                    attachHomeEvents();
+                    break;
+                case 'clinics':
+                    container.innerHTML = renderClinicsView();
+                    attachClinicsEvents();
+                    break;
+                case 'doctors':
+                    container.innerHTML = renderDoctorsView();
+                    attachDoctorsEvents();
+                    break;
+                case 'doctor-detail':
+                    container.innerHTML = renderDoctorDetailView(AppState.selectedDoctorId);
+                    attachDoctorDetailEvents(AppState.selectedDoctorId);
+                    break;
+                case 'appointments':
+                    container.innerHTML = renderAppointmentsView();
+                    attachAppointmentsEvents();
+                    break;
+                default:
+                    container.innerHTML = renderHomeView();
+                    attachHomeEvents();
+            }
+        }
+
+        function renderHomeView() {
+            const featuredDoctors = DoctorsData.slice(0, 3);
+            return `
+                <!-- Hero Banner -->
+                <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-sky-950 to-teal-950 text-white p-6 sm:p-10 lg:p-14 shadow-xl border border-slate-800">
+                    <div class="max-w-3xl relative z-10">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/30 text-sky-300 text-xs font-semibold mb-4">
+                            <i class="fas fa-location-dot"></i>
+                            <span>Trusted Clinics in Amman, Zarqa & Irbid</span>
+                        </span>
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight mb-4">
+                            Find Specialists & Book Clinic Appointments Effortlessly
+                        </h1>
+                        <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-7 max-w-2xl">
+                            Explore verified clinics, compare doctors by specialty and working hours, and reserve your visit time slot in just a few clicks.
+                        </p>
+
+                        <!-- Search Bar -->
+                        <div class="bg-white dark:bg-slate-900 p-2 rounded-2xl shadow-2xl flex flex-col sm:flex-row gap-2 max-w-2xl border border-slate-200 dark:border-slate-700">
+                            <div class="flex-1 flex items-center gap-2.5 px-3">
+                                <i class="fas fa-magnifying-glass text-slate-400"></i>
+                                <input
+                                    id="hero-search-input"
+                                    type="text"
+                                    value="${AppState.searchQuery}"
+                                    placeholder="Search doctor name, clinic, or specialty..."
+                                    class="w-full py-2 text-sm bg-transparent text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
+                                />
+                            </div>
+                            <button id="hero-search-btn" class="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold smooth-transition flex items-center justify-center gap-2">
+                                <span>Search Doctors</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-white/10 max-w-lg">
+                            <div>
+                                <div class="text-2xl font-extrabold text-white">${ClinicsData.length}</div>
+                                <div class="text-xs text-slate-300">Partner Clinics</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-extrabold text-teal-300">${DoctorsData.length}</div>
+                                <div class="text-xs text-slate-300">Verified Doctors</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-extrabold text-sky-300">${SpecialtiesData.length}</div>
+                                <div class="text-xs text-slate-300">Medical Specialties</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Specialties Section -->
+                <section class="mt-12">
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Browse by Specialty</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Select a specialty to filter available doctors</p>
+                        </div>
+                        <button data-nav="doctors" class="text-sm font-semibold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1">
+                            <span>View All</span>
+                            <i class="fas fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                        ${SpecialtiesData.map(spec => `
+                            <button data-specialty="${spec.name}" class="specialty-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-500 dark:hover:border-sky-400 rounded-2xl p-4 text-center shadow-sm hover:shadow-md smooth-transition group">
+                                <div class="w-12 h-12 mx-auto rounded-2xl ${spec.color} flex items-center justify-center text-xl mb-3 group-hover:scale-110 smooth-transition">
+                                    <i class="fas ${spec.icon}"></i>
+                                </div>
+                                <div class="font-bold text-sm text-slate-800 dark:text-slate-100">${spec.name}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                </section>
+
+                <!-- Featured Doctors Preview -->
+                <section class="mt-12">
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Featured Doctors</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Check schedules and book directly with specialists</p>
+                        </div>
+                        <button data-nav="clinics" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs sm:text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 smooth-transition">
+                            Explore Clinics
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${featuredDoctors.map(doc => renderDoctorCardHtml(doc)).join('')}
+                    </div>
+                </section>
+            `;
+        }
+
+        function attachHomeEvents() {
+            const searchInput = document.getElementById('hero-search-input');
+            const searchBtn = document.getElementById('hero-search-btn');
+
+            const runSearch = () => {
+                AppState.searchQuery = searchInput ? searchInput.value.trim() : '';
+                AppState.selectedSpecialty = 'All';
+                AppState.selectedCity = 'All';
+                navigateTo('doctors');
+            };
+
+            if (searchBtn) searchBtn.addEventListener('click', runSearch);
+            if (searchInput) {
+                searchInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') runSearch();
+                });
+            }
+
+            document.querySelectorAll('.specialty-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    AppState.selectedSpecialty = card.dataset.specialty;
+                    AppState.selectedCity = 'All';
+                    AppState.searchQuery = '';
+                    navigateTo('doctors');
+                });
+            });
+        }
+
+        function renderClinicsView() {
+            const cityFilter = AppState.selectedCity;
+            const filteredClinics = cityFilter === 'All'
+                ? ClinicsData
+                : ClinicsData.filter(c => c.city === cityFilter);
+
+            return `
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Medical Clinics</h1>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            Showing ${filteredClinics.length} accredited clinics across Jordan
+                        </p>
+                    </div>
+
+                    <!-- City Filter Pills -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        ${['All', 'Amman', 'Zarqa', 'Irbid'].map(city => `
+                            <button data-clinic-city="${city}" class="clinic-city-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold smooth-transition ${
+                                cityFilter === city
+                                    ? 'bg-sky-600 text-white shadow-sm'
+                                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-sky-400'
+                            }">${city === 'All' ? 'All Cities' : city}</button>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${filteredClinics.map(clinic => {
+                        const clinicDoctorsCount = DoctorsData.filter(d => d.clinicId === clinic.id).length;
+                        return `
+                            <article class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md smooth-transition flex flex-col">
+                                <div class="relative h-44 bg-slate-200 dark:bg-slate-800">
+                                    <img src="${clinic.image}" alt="${clinic.name}" class="w-full h-full object-cover" onerror="this.style.display='none'" />
+                                    <span class="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-slate-900/80 text-white text-xs font-bold backdrop-blur-sm">
+                                        <i class="fas fa-location-dot text-sky-400 mr-1"></i>${clinic.city}
+                                    </span>
+                                    <span class="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 text-xs font-extrabold">
+                                        <i class="fas fa-star mr-1"></i>${clinic.rating}
+                                    </span>
+                                </div>
+                                <div class="p-5 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">${clinic.name}</h2>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">${clinic.description}</p>
+                                        <div class="mt-4 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-map-pin text-sky-600 dark:text-sky-400 w-4"></i>
+                                                <span>${clinic.address}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-phone text-teal-600 dark:text-teal-400 w-4"></i>
+                                                <span>${clinic.phone}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-clock text-amber-600 dark:text-amber-400 w-4"></i>
+                                                <span>${clinic.hours}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                        <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                            ${clinicDoctorsCount} ${clinicDoctorsCount === 1 ? 'Doctor' : 'Doctors'}
+                                        </span>
+                                        <button data-clinic-id="${clinic.id}" class="view-clinic-doctors-btn px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold smooth-transition">
+                                            View Doctors & Hours
+                                        </button>
+                                    </div>
+                                </div>
+                            </article>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function attachClinicsEvents() {
+            document.querySelectorAll('.clinic-city-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    AppState.selectedCity = btn.dataset.clinicCity;
+                    renderCurrentView();
+                });
+            });
+
+            document.querySelectorAll('.view-clinic-doctors-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const clinicId = Number(btn.dataset.clinicId);
+                    const clinic = ClinicsData.find(c => c.id === clinicId);
+                    AppState.selectedCity = clinic ? clinic.city : 'All';
+                    AppState.selectedSpecialty = 'All';
+                    AppState.searchQuery = clinic ? clinic.name : '';
+                    navigateTo('doctors');
+                });
+            });
+        }
+
+        function renderDoctorCardHtml(doc) {
+            return `
+                <article class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md smooth-transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-start justify-between gap-3 mb-4">
+                            <div class="flex items-center gap-3.5">
+                                <img src="${doc.avatar}" alt="${doc.name}" class="w-14 h-14 rounded-2xl object-cover border border-slate-200 dark:border-slate-700" onerror="this.style.display='none'" />
+                                <div>
+                                    <h3 class="font-bold text-base text-slate-900 dark:text-white leading-snug">${doc.name}</h3>
+                                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 text-xs font-bold">
+                                        ${doc.specialty}
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                                doc.available
+                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                            }">
+                                ${doc.available ? 'Available' : 'Limited Slots'}
+                            </span>
+                        </div>
+
+                        <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">${doc.bio}</p>
+
+                        <div class="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400">Clinic:</span>
+                                <span class="font-semibold text-slate-800 dark:text-slate-200">${doc.clinicName}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400">City:</span>
+                                <span class="font-semibold">${doc.city}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-400">Working Days:</span>
+                                <span class="font-semibold text-teal-700 dark:text-teal-300">${doc.schedule.length} Days / Week</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[11px] text-slate-400 block">Consultation</span>
+                            <span class="text-sm font-extrabold text-slate-900 dark:text-white">${doc.fee}</span>
+                        </div>
+                        <button data-doctor-id="${doc.id}" class="select-doctor-btn px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold smooth-transition flex items-center gap-1.5">
+                            <span>Schedule & Book</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderDoctorsView() {
+            const filtered = DoctorsData.filter(doc => {
+                const matchesSpec = AppState.selectedSpecialty === 'All' || doc.specialty === AppState.selectedSpecialty;
+                const matchesCity = AppState.selectedCity === 'All' || doc.city === AppState.selectedCity;
+                const q = AppState.searchQuery.toLowerCase();
+                const matchesSearch = !q ||
+                    doc.name.toLowerCase().includes(q) ||
+                    doc.specialty.toLowerCase().includes(q) ||
+                    doc.clinicName.toLowerCase().includes(q) ||
+                    doc.city.toLowerCase().includes(q);
+                return matchesSpec && matchesCity && matchesSearch;
+            });
+
+            return `
+                <div class="mb-8">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+                        <div>
+                            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Doctors Directory</h1>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                Filter doctors by specialty, city, or keyword and inspect their weekly schedules
+                            </p>
+                        </div>
+                        ${(AppState.selectedSpecialty !== 'All' || AppState.selectedCity !== 'All' || AppState.searchQuery) ? `
+                            <button id="reset-filters-btn" class="self-start md:self-auto px-3.5 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 smooth-transition">
+                                <i class="fas fa-rotate-left mr-1"></i>Reset Filters
+                            </button>
+                        ` : ''}
+                    </div>
+
+                    <!-- Filter Controls -->
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">Search Keyword</label>
+                            <input
+                                id="doctors-search-input"
+                                type="text"
+                                value="${AppState.searchQuery}"
+                                placeholder="Doctor, clinic, or specialty..."
+                                class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-sky-500"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">Specialty</label>
+                            <select id="doctors-specialty-select" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-sky-500">
+                                <option value="All" ${AppState.selectedSpecialty === 'All' ? 'selected' : ''}>All Specialties</option>
+                                ${SpecialtiesData.map(s => `
+                                    <option value="${s.name}" ${AppState.selectedSpecialty === s.name ? 'selected' : ''}>${s.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">City</label>
+                            <select id="doctors-city-select" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-sky-500">
+                                ${['All', 'Amman', 'Zarqa', 'Irbid'].map(city => `
+                                    <option value="${city}" ${AppState.selectedCity === city ? 'selected' : ''}>${city === 'All' ? 'All Cities' : city}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                ${filtered.length > 0 ? `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${filtered.map(doc => renderDoctorCardHtml(doc)).join('')}
+                    </div>
+                ` : `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center">
+                        <i class="fas fa-user-md text-4xl text-slate-300 dark:text-slate-600 mb-3"></i>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white">No Matching Doctors Found</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Try clearing your search or choosing a different specialty or city.</p>
+                    </div>
+                `}
+            `;
+        }
+
+        function attachDoctorsEvents() {
+            const searchInput = document.getElementById('doctors-search-input');
+            const specSelect = document.getElementById('doctors-specialty-select');
+            const citySelect = document.getElementById('doctors-city-select');
+            const resetBtn = document.getElementById('reset-filters-btn');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    AppState.searchQuery = e.target.value;
+                    renderCurrentView();
+                });
+            }
+            if (specSelect) {
+                specSelect.addEventListener('change', (e) => {
+                    AppState.selectedSpecialty = e.target.value;
+                    renderCurrentView();
+                });
+            }
+            if (citySelect) {
+                citySelect.addEventListener('change', (e) => {
+                    AppState.selectedCity = e.target.value;
+                    renderCurrentView();
+                });
+            }
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    AppState.selectedSpecialty = 'All';
+                    AppState.selectedCity = 'All';
+                    AppState.searchQuery = '';
+                    renderCurrentView();
+                });
+            }
+
+            document.querySelectorAll('.select-doctor-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    navigateTo('doctor-detail', Number(btn.dataset.doctorId));
+                });
+            });
+        }
+
+        function renderDoctorDetailView(doctorId) {
+            const doc = DoctorsData.find(d => d.id === doctorId) || DoctorsData[0];
+            const clinic = ClinicsData.find(c => c.id === doc.clinicId) || ClinicsData[0];
+            const allSlots = doc.schedule.flatMap(dayObj =>
+                dayObj.slots.map(slot => `${dayObj.day} — ${slot}`)
+            );
+
+            return `
+                <button id="back-to-doctors-btn" class="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 smooth-transition">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Doctors Directory</span>
+                </button>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Left Column: Doctor Info & Working Hours -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-5">
+                                <img src="${doc.avatar}" alt="${doc.name}" class="w-24 h-24 rounded-2xl object-cover border border-slate-200 dark:border-slate-700" onerror="this.style.display='none'" />
+                                <div class="flex-1">
+                                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                                        <span class="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 text-xs font-bold">
+                                            ${doc.specialty}
+                                        </span>
+                                        <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold">
+                                            ${doc.experience}
+                                        </span>
+                                    </div>
+                                    <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white">${doc.name}</h1>
+                                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                        <i class="fas fa-hospital text-sky-600 dark:text-sky-400 mr-1"></i>
+                                        ${clinic.name} (${clinic.city} • ${clinic.address})
+                                    </p>
+                                </div>
+                            </div>
+
+                            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mt-5 pt-5 border-t border-slate-100 dark:border-slate-800">
+                                ${doc.bio}
+                            </p>
+                        </div>
+
+                        <!-- Working Hours & Slots Table -->
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+                            <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                <i class="fas fa-calendar-week text-teal-600 dark:text-teal-400"></i>
+                                <span>Weekly Working Hours & Available Slots</span>
+                            </h2>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-sm">
+                                    <thead>
+                                        <tr class="border-b border-slate-200 dark:border-slate-800 text-xs uppercase text-slate-400">
+                                            <th class="py-2.5 pr-4">Day</th>
+                                            <th class="py-2.5 pr-4">Working Hours</th>
+                                            <th class="py-2.5">Available Time Slots</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        ${doc.schedule.map(row => `
+                                            <tr>
+                                                <td class="py-3 pr-4 font-bold text-slate-800 dark:text-slate-200">${row.day}</td>
+                                                <td class="py-3 pr-4 text-slate-600 dark:text-slate-300 whitespace-nowrap">${row.hours}</td>
+                                                <td class="py-3">
+                                                    <div class="flex flex-wrap gap-1.5">
+                                                        ${row.slots.map(slot => `
+                                                            <span class="px-2.5 py-1 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 text-xs font-semibold border border-teal-200/70 dark:border-teal-800/70">
+                                                                ${slot}
+                                                            </span>
+                                                        `).join('')}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Booking Form -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-md sticky top-24">
+                            <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                                <div>
+                                    <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">Book Appointment</h2>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Consultation Fee: <strong class="text-sky-600 dark:text-sky-400">${doc.fee}</strong></p>
+                                </div>
+                                <i class="fas fa-notes-medical text-2xl text-sky-600 dark:text-sky-400"></i>
+                            </div>
+
+                            <form id="booking-form" class="space-y-4" novalidate>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                        Patient Full Name <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                        id="patient-name"
+                                        type="text"
+                                        placeholder="e.g., Dima Salameh"
+                                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-sky-500"
+                                    />
+                                    <p id="err-name" class="text-xs text-rose-500 mt-1 hidden"></p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                        Phone Number <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                        id="patient-phone"
+                                        type="tel"
+                                        placeholder="e.g., 0791234567"
+                                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-sky-500"
+                                    />
+                                    <p id="err-phone" class="text-xs text-rose-500 mt-1 hidden"></p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                        Preferred Date <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                        id="patient-date"
+                                        type="date"
+                                        value="2026-11-25"
+                                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-sky-500"
+                                    />
+                                    <p id="err-date" class="text-xs text-rose-500 mt-1 hidden"></p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                        Day & Time Slot <span class="text-rose-500">*</span>
+                                    </label>
+                                    <select
+                                        id="patient-slot"
+                                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-sky-500"
+                                    >
+                                        ${allSlots.map(s => `<option value="${s}">${s}</option>`).join('')}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                                        Visit Notes (Optional)
+                                    </label>
+                                    <textarea
+                                        id="patient-notes"
+                                        rows="2"
+                                        placeholder="Symptoms or reason for visit..."
+                                        class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:border-sky-500"
+                                    ></textarea>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    class="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md shadow-teal-600/20 smooth-transition flex items-center justify-center gap-2"
+                                >
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Confirm Appointment</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function attachDoctorDetailEvents(doctorId) {
+            const doc = DoctorsData.find(d => d.id === doctorId) || DoctorsData[0];
+            const backBtn = document.getElementById('back-to-doctors-btn');
+            const form = document.getElementById('booking-form');
+
+            if (backBtn) {
+                backBtn.addEventListener('click', () => navigateTo('doctors'));
+            }
+
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    const nameEl = document.getElementById('patient-name');
+                    const phoneEl = document.getElementById('patient-phone');
+                    const dateEl = document.getElementById('patient-date');
+                    const slotEl = document.getElementById('patient-slot');
+                    const notesEl = document.getElementById('patient-notes');
+
+                    const errName = document.getElementById('err-name');
+                    const errPhone = document.getElementById('err-phone');
+                    const errDate = document.getElementById('err-date');
+
+                    [errName, errPhone, errDate].forEach(el => {
+                        if (el) {
+                            el.textContent = '';
+                            el.classList.add('hidden');
+                        }
+                    });
+
+                    let isValid = true;
+                    const nameVal = nameEl.value.trim();
+                    const phoneVal = phoneEl.value.trim();
+                    const dateVal = dateEl.value.trim();
+
+                    if (nameVal.length < 2) {
+                        errName.textContent = 'Please enter the patient full name.';
+                        errName.classList.remove('hidden');
+                        isValid = false;
+                    }
+
+                    if (!/^[0-9+\-\s]{7,15}$/.test(phoneVal)) {
+                        errPhone.textContent = 'Please enter a valid phone number.';
+                        errPhone.classList.remove('hidden');
+                        isValid = false;
+                    }
+
+                    if (!dateVal) {
+                        errDate.textContent = 'Please select an appointment date.';
+                        errDate.classList.remove('hidden');
+                        isValid = false;
+                    }
+
+                    if (!isValid) return;
+
+                    const newAppointment = {
+                        id: 'APT-' + Math.floor(1000 + Math.random() * 9000),
+                        doctorId: doc.id,
+                        doctorName: doc.name,
+                        specialty: doc.specialty,
+                        clinicName: doc.clinicName,
+                        city: doc.city,
+                        patientName: nameVal,
+                        phone: phoneVal,
+                        date: dateVal,
+                        timeSlot: slotEl.value,
+                        notes: notesEl.value.trim() || 'General consultation',
+                        status: 'Confirmed'
+                    };
+
+                    AppState.appointments.unshift(newAppointment);
+                    updateAppointmentBadge();
+                    showToast(`Appointment booked with ${doc.name}!`);
+                    navigateTo('appointments');
+                });
+            }
+        }
+
+        function renderAppointmentsView() {
+            return `
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">My Appointments</h1>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                            View or cancel scheduled clinic visits
+                        </p>
+                    </div>
+                    <button data-nav="doctors" class="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm font-bold smooth-transition">
+                        + Book Another Appointment
+                    </button>
+                </div>
+
+                ${AppState.appointments.length > 0 ? `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-xs uppercase text-slate-500 dark:text-slate-400">
+                                        <th class="py-3.5 px-4">Reference</th>
+                                        <th class="py-3.5 px-4">Doctor & Specialty</th>
+                                        <th class="py-3.5 px-4">Clinic & City</th>
+                                        <th class="py-3.5 px-4">Patient</th>
+                                        <th class="py-3.5 px-4">Date & Slot</th>
+                                        <th class="py-3.5 px-4">Status</th>
+                                        <th class="py-3.5 px-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                    ${AppState.appointments.map(apt => `
+                                        <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 smooth-transition">
+                                            <td class="py-3.5 px-4 font-mono text-xs font-bold text-sky-600 dark:text-sky-400">${apt.id}</td>
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-bold text-slate-900 dark:text-white">${apt.doctorName}</div>
+                                                <div class="text-xs text-slate-500">${apt.specialty}</div>
+                                            </td>
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 dark:text-slate-200">${apt.clinicName}</div>
+                                                <div class="text-xs text-slate-500">${apt.city}</div>
+                                            </td>
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 dark:text-slate-200">${apt.patientName}</div>
+                                                <div class="text-xs text-slate-500">${apt.phone}</div>
+                                            </td>
+                                            <td class="py-3.5 px-4">
+                                                <div class="font-semibold text-slate-800 dark:text-slate-200">${apt.date}</div>
+                                                <div class="text-xs text-teal-600 dark:text-teal-400 font-semibold">${apt.timeSlot}</div>
+                                            </td>
+                                            <td class="py-3.5 px-4">
+                                                <span class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+                                                    ${apt.status}
+                                                </span>
+                                            </td>
+                                            <td class="py-3.5 px-4 text-right">
+                                                <button data-apt-id="${apt.id}" class="cancel-apt-btn px-3 py-1.5 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 border border-rose-200 dark:border-rose-900/50 smooth-transition">
+                                                    Cancel
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center">
+                        <i class="fas fa-calendar-xmark text-4xl text-slate-300 dark:text-slate-600 mb-3"></i>
+                        <h3 class="text-lg font-bold text-slate-800 dark:text-white">No Appointments Scheduled</h3>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-5">Browse our doctors and book your first clinic appointment.</p>
+                        <button data-nav="doctors" class="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold smooth-transition">
+                            Browse Doctors
+                        </button>
+                    </div>
+                `}
+            `;
+        }
+
+        function attachAppointmentsEvents() {
+            document.querySelectorAll('.cancel-apt-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const aptId = btn.dataset.aptId;
+                    AppState.appointments = AppState.appointments.filter(a => a.id !== aptId);
+                    updateAppointmentBadge();
+                    showToast('Appointment cancelled.', 'error');
+                    renderCurrentView();
+                });
+            });
+        }
+
+        /**
+         * Global Event Delegation & Initialization
+         */
+        document.addEventListener('click', (e) => {
+            const navTrigger = e.target.closest('[data-nav]');
+            if (navTrigger) {
+                e.preventDefault();
+                navigateTo(navTrigger.dataset.nav);
+            }
+        });
+
+        const brandBtn = document.getElementById('brand-home-btn');
+        if (brandBtn) {
+            brandBtn.addEventListener('click', () => navigateTo('home'));
+        }
+
+        window.addEventListener('error', () => {
+            const errBanner = document.getElementById('app-error-banner');
+            if (errBanner) errBanner.classList.remove('hidden');
+        });
+
+        // Initial Render
+        try {
+            updateActiveNavStyles();
+            updateAppointmentBadge();
+            renderCurrentView();
+        } catch (err) {
+            console.error('Initialization failed:', err);
+            const errBanner = document.getElementById('app-error-banner');
+            if (errBanner) errBanner.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
